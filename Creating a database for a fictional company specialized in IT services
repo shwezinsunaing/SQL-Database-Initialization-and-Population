@@ -1,0 +1,185 @@
+#Creating the Employee Table 
+Create TABLE Employee (
+Employee_id INT PRIMARY KEY,
+First_name VARCHAR (50),
+Last_name VARCHAR(50),
+Phone VARCHAR(15),
+Email VARCHAR(100),
+Hire_date DATE,
+JobTitle VARCHAR (100)
+);
+
+
+
+#Creating the Client Table 
+Create Table Client (
+Client_id INT PRIMARY KEY,
+First_name VARCHAR(50),
+Last_name VARCHAR(50),
+Phone VARCHAR(15),
+Email VARCHAR(100),
+Industry VARCHAR(100)
+);
+
+
+
+
+#Creating the Project Table 
+Create Table Project (
+Project_id INT PRIMARY KEY,
+Project_name VARCHAR(50),
+Brief_description VARCHAR(200),
+Start_date DATE,
+End_date DATE
+);
+
+
+
+
+#Creating the Skills Table 
+Create Table Skills(
+Skill_id INT PRIMARY KEY,
+Skill_name VARCHAR(100)
+);
+
+
+#Creating EmployeeSkills table, Conjunction table 
+CREATE Table EmployeeSkills(
+Skill_id INT,
+Employee_id INT,
+EmployeeName VARCHAR(100),
+FOREIGN KEY(Skill_id) REFERENCES Skills(Skill_id),
+FOREIGN KEY(Employee_id) REFERENCES Employee(Employee_id)
+);
+
+
+#Creating Trigger for certain columns to be filled automatically
+CREATE TRIGGER PopulateSkillsColumns
+BEFORE INSERT ON EmployeeSkills
+FOR EACH ROW 
+BEGIN 
+    DECLARE EmployeeName VARCHAR(100);
+    SELECT CONCAT(First_Name,'',Last_Name) INTO EmployeeName
+    FROM Employee
+    WHERE Employee_id = NEW.Employee_id;
+    SET NEW.EmployeeName = EmployeeName;
+END;
+
+#Creating the Employee_project_assignment table, A Conjunction Table 
+Create Table Employee_project_assignment (
+Employee_id INT,
+FOREIGN KEY(Employee_id)
+REFERENCES Employee(Employee_id),
+Project_id INT,
+FOREIGN KEY(Project_id)
+REFERENCES Project(Project_id),
+Startdate DATE,
+Enddate DATE,
+Job_title VARCHAR(50)
+);
+
+
+#Creating trigger for certain columns to be filled automatically when inserting the foreign key values
+CREATE TRIGGER PopulateAssignmentColumns
+BEFORE INSERT ON Employee_project_assignment
+FOR EACH ROW
+BEGIN
+    DECLARE Job_title VARCHAR(50);
+    DECLARE Startdate DATE;
+    DECLARE Enddate DATE;
+
+    SELECT JobTitle INTO Job_title
+    FROM Employee
+    WHERE Employee_id = NEW.Employee_id;
+
+    SELECT Start_date INTO Startdate
+    FROM Project
+    WHERE Project_id = NEW.Project_id;
+
+    SELECT End_date INTO Enddate
+    FROM Project
+    WHERE Project_id = NEW.Project_id;
+
+    SET NEW.Job_title = Job_title;
+    SET NEW.Startdate = Startdate;
+    SET NEW.Enddate = Enddate;
+END;
+
+
+#Inserting values into the tables 
+INSERT INTO Employee (Employee_id, First_name, Last_name, Phone, Email, Hire_date, JobTitle)
+VALUES
+(1, 'John', 'Smith', '555_123_4567', 'johnsmith@email.com', '2020-01-15', 'Software Engineer'),
+(2, 'Jane', 'Doe', '555_987_6543', 'janedoe@email.com', '2019-03-20', 'Project Manager'),
+(3, 'David', 'Johnson', '555_555_5555', 'davidj@email.com', '2021-05-10', 'Data Analyst'),
+(4, 'Sarah', 'Brown', '555-222-3333', 'sarah.b@email.com', '2022-02-01', 'QA Engineer'),
+(5, 'Michael', 'Lee', '555-777-8888', 'michael.lee@email.com', '2021-08-12', 'UI Designer');
+
+
+INSERT INTO Client (Client_id, First_name, Last_name, Phone, Email, Industry)
+VALUES 
+(101, "XYZ", "Corporation", "555-999-0000", "xyz@companyxyz.com", "Finance"),
+(102,  "ABC", "Industries", "555-333-4444", "info@abcindustries.com", "Manufacturing"),
+(103,  "Global", "Solutions", "555-555-5555", "contact@globalsol.com", "Consulting"),
+(104, "Alpha", "Innovations", "555-777-8888", "alpha@innovate.com", "Research"),
+(105, "Omega",  "Enterprises", "555-999-0000", "info@omegaagent.com", "Finance")
+;
+
+
+
+
+INSERT INTO Project (Project_id, Project_name, Brief_description, Start_date, End_date)
+VALUES
+(201, "Web Redesign", "Redesign Company Website", "2023-01-01", "2023-06-30"),
+(202,"CRM Implementation", "Implement CRM system", "2023-02-01", "2023-07-31"),
+(203, "Mobile App Launch", "Launch Mobile App", "2023-03-01", "2023-08-31"),
+(204, "Data Analytics", "Analyze Sales Data", "2023-04-01", "2023-09-30"),
+(205, "Cloud Migration", "Migrate to Cloud Platform", "2023-05-01", "2023-10-31")
+;
+
+INSERT INTO Employee_project_assignment (Employee_id, Project_id)
+VALUES
+(1,201),
+(2,201),
+(3,201),
+(1,202),
+(2,202),
+(3,203),
+(2,204),
+(3,204),
+(4,204),
+(5,205)
+;
+
+
+
+INSERT INTO Skills ( Skill_id, Skill_name)
+VALUES 
+(301, "Java"),
+(302, "Python"),
+(303, "SQL"),
+(304, "Project Management"),
+(305, "UI/UX Design"),
+(306, "Data Analysis"),
+(307, "Quality Assurance"),
+(308, "C#"),
+(309, "JavaScript"),
+(310, "Machine Learning")
+;
+
+INSERT INTO EmployeeSkills (Skill_id, Employee_id)
+VALUES 
+(301,1),
+(302,1),
+(302,3),
+(303,3),
+(304,2),
+(305,5),
+(306,3),
+(307,4),
+(308,1),
+(309,1),
+(309,4),
+(310,3)
+;
+
